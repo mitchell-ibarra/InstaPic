@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "840950495607",
+    "project_id": "instapic-49dee",
+    "storage_bucket": "instapic-49dee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840950495607:android:2f971112b04e2f73640972",
+        "android_client_info": {
+          "package_name": "com.miibarra.instapic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "840950495607-pt9nv73tjvhf615ef7q0sfkdnqojelgj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3VFVJ3RSdm3CO2dGL1w_2k91PofB-TXU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "840950495607-pt9nv73tjvhf615ef7q0sfkdnqojelgj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
