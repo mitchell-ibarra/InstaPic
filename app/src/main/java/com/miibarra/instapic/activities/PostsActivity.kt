@@ -7,16 +7,21 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.miibarra.instapic.R
 import com.miibarra.instapic.adapters.PostsAdapter
 import com.miibarra.instapic.models.PostModel
+import com.miibarra.instapic.models.UserModel
 import kotlinx.android.synthetic.main.activity_posts.*
 
 private const val TAG = "PostsActivity"
+const val EXTRA_USERNAME = "EXTRA_USERNAME"
 
-class PostsActivity : AppCompatActivity() {
+open class PostsActivity : AppCompatActivity() {
+
+    private var authenticatedUser: UserModel? = null
     // Create as lateinit var since it will be initialized in onCreate
     // Should never be null after initialization
     private lateinit var firestoreDB: FirebaseFirestore
@@ -38,10 +43,31 @@ class PostsActivity : AppCompatActivity() {
         rvPostsHome.layoutManager = LinearLayoutManager(this)
 
         firestoreDB = FirebaseFirestore.getInstance()
-        val collectionPosts = firestoreDB
+
+        firestoreDB.collection("users")
+            .document(FirebaseAuth.getInstance().currentUser?.uid as String)
+            .get()
+            .addOnSuccessListener { userSnapshot ->
+                authenticatedUser = userSnapshot.toObject(UserModel::class.java)
+                Log.i(TAG, "Authenticated user is $authenticatedUser")
+            }
+            .addOnFailureListener { exception ->
+                Log.e(TAG, "Failed to get the authenticated user", exception)
+            }
+
+
+        var collectionPosts: Query = firestoreDB
             .collection("posts")
             .limit(10)
             .orderBy("creation_time_ms", Query.Direction.DESCENDING)
+
+        // Check for username and if not null then that means we are in the profile activity
+        // Query posts to only show the results that match the profile's username
+        val username = intent.getStringExtra(EXTRA_USERNAME)
+        if (username != null) {
+            supportActionBar?.title = username
+            collectionPosts = collectionPosts.whereEqualTo("user.username", username)
+        }
 
         // One of two ways to query all documents in collection
         // .get() gets entire collection
@@ -62,6 +88,11 @@ class PostsActivity : AppCompatActivity() {
                 Log.i(TAG, "Post $post")
             }
         }
+
+        fabCreatePost.setOnClickListener {
+            val createPostIntent = Intent(this, CreatePostActivity::class.java)
+            startActivity(createPostIntent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -74,6 +105,7 @@ class PostsActivity : AppCompatActivity() {
         // Grab the menu item and go to profile activity if profile is chosen
         if (item.itemId == R.id.menu_profile) {
             val profileIntent = Intent(this, ProfileActivity::class.java)
+            profileIntent.putExtra(EXTRA_USERNAME, authenticatedUser?.username)
             startActivity(profileIntent)
         }
         return super.onOptionsItemSelected(item)

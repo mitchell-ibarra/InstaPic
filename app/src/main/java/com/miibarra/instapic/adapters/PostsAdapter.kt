@@ -10,6 +10,8 @@ import com.bumptech.glide.Glide
 import com.miibarra.instapic.R
 import com.miibarra.instapic.models.PostModel
 import kotlinx.android.synthetic.main.item_single_post.view.*
+import java.math.BigInteger
+import java.security.MessageDigest
 
 class PostsAdapter (val context: Context, val posts: List<PostModel>) :
     RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
@@ -27,10 +29,21 @@ class PostsAdapter (val context: Context, val posts: List<PostModel>) :
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(post: PostModel) {
-            itemView.tvUsername.text = post.user?.username
+            val username = post.user?.username as String
+            itemView.tvUsername.text = username
             itemView.tvDescription.text = post.description
             Glide.with(context).load(post.imageUrl).into(itemView.ivPost)
+            Glide.with(context).load(getProfileImageUrl(username)).into(itemView.ivProfileImage)
             itemView.tvPostTime.text = DateUtils.getRelativeTimeSpanString(post.creationTimeMs)
+        }
+
+        private fun getProfileImageUrl(username: String): String {
+            // User gravatar to generate a unique image url for each user
+            val md5Digest = MessageDigest.getInstance("MD5")
+            val hashcode = md5Digest.digest(username.toByteArray())
+            val bigInt = BigInteger(hashcode)
+            val hexadecimal = bigInt.abs().toString(16)
+            return "https://www.gravatar.com/avatar/$hexadecimal?d=identicon"
         }
     }
 }
